@@ -68,9 +68,6 @@ private :
 	unsigned units_sold = 0;
 	unsigned price = 0 ;
 	double revenue = 0.0;
-
-
-
 };
 
 std::istream &read ( std::istream &is, Sales_data &item){
