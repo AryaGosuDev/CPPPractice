@@ -15,6 +15,7 @@
 #include <list>
 #include <map>
 #include <set>
+#include <sstream>
 
 using std::endl;
 using std::cout;
@@ -24,43 +25,56 @@ using std::for_each;
 using std::vector;
 using std::list;
 
-bool addFamily ( std::map<string, vector<string>>  & familyMap, const string  & familyName) {
-		return (&familyMap[familyName]) != NULL  ;
+class StrBlob {
+
+public:
+	StrBlob() {};
+	StrBlob(std::initializer_list<string> li);
+
+	string back() const ;
+	string front() const ;
+
+	void print () const  {
+		for_each ( data->begin(), data->end(), [](string & vecString) { cout << vecString << endl ;});
+
+	}
+
+private:
+
+	std::shared_ptr<vector<string>> data ;
+};
+
+StrBlob::StrBlob(std::initializer_list<string> li) : data(std::make_shared<vector<string>>(li)){
+
 }
 
+string StrBlob::back() const {
+	return data->back();
+
+}
+
+string StrBlob::front() const {
+	return data->front();
+}
 
 int main ( void ) {
 
   try {
 
-	  std::vector<int> v = { 1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 4, 3, 2, 1, 9, 9};
-
-		std:vector<std::pair<string,int>> thisPairMap ;
-
-	  vector<int> inputIntStream;
-
-	  std::ostream_iterator<int> out_iter ( std::cout, " " );
-
-	  //std::istream_iterator<string> int_in ( std::cin), eof_cin, copy_cin_in ;
-		int number ;
-		string word;
-
-	  while ( std::cin >> word ) {
-			cout << "Adding number" << endl;
-			std::cin >> number ;
-			cout << "Adding to vector pair" << endl;
-			thisPairMap.push_back ( std::pair<string, int> ( word, number ));
-	  }
+  	StrBlob b1 ;
+  	{
+  		StrBlob b2 = { "a", "b", "c"} ;
+  		b1 = b2 ;
 
 
 
+  	}
 
-		for ( auto &a : thisPairMap){
-			cout << a.first << endl;
-		}
+  	cout << b1.back();
 
-		//for_each ( thisPairMap.begin(), thisPairMap.end(), [](std::pair<string, int> a) { cout << a.first << " " << a.second << endl;});
+  	b1.print();
 
+  	//for_each ( )
 
 	}
 	catch ( std::exception ex) {
