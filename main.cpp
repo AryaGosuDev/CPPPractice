@@ -16,6 +16,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <memory>
 
 using std::endl;
 using std::cout;
@@ -25,56 +26,43 @@ using std::for_each;
 using std::vector;
 using std::list;
 
-class StrBlob {
+void assignInts ( std::vector<int> * _intVec ) {
+	int _inputInt ;
+	while ( std::cin >> _inputInt){
+		_intVec->push_back(_inputInt) ;
+	}
+}
 
-public:
-	StrBlob() {};
-	StrBlob(std::initializer_list<string> li);
+void printInts ( std::vector<int> * _intVec ) {
 
-	string back() const ;
-	string front() const ;
-
-	void print () const  {
-		for_each ( data->begin(), data->end(), [](string & vecString) { cout << vecString << endl ;});
-
+	for_each ( _intVec->begin(), _intVec->end(), [](int & _i){ cout << _i << endl;});
 	}
 
-private:
-
-	std::shared_ptr<vector<string>> data ;
-};
-
-StrBlob::StrBlob(std::initializer_list<string> li) : data(std::make_shared<vector<string>>(li)){
-
+	void process(std::shared_ptr<int> ptr)
+{
+    std::cout << "inside the process function:" << ptr.use_count() << "\n";
 }
 
-string StrBlob::back() const {
-	return data->back();
+void end_int ( int * a) {
 
+	delete a ;
+	cout << "Delete a";
 }
 
-string StrBlob::front() const {
-	return data->front();
-}
+typedef std::unique_ptr<int> IntP ;
+
 
 int main ( void ) {
 
   try {
+  			int ix = 1024;
+  			int * p1 = &ix ;
+  			int * pi2 = new int(2048);
+  			IntP p0(pi2);
+  			IntP p5(p0.get());
 
-  	StrBlob b1 ;
-  	{
-  		StrBlob b2 = { "a", "b", "c"} ;
-  		b1 = b2 ;
 
 
-
-  	}
-
-  	cout << b1.back();
-
-  	b1.print();
-
-  	//for_each ( )
 
 	}
 	catch ( std::exception ex) {
