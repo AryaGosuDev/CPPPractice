@@ -27,141 +27,134 @@ using std::for_each;
 using std::vector;
 using std::list;
 
-//vector to store each line in the file
-//istringstream to break each line into words
+class Folder ;
 
-//result set, holds the lines that each found word is on
-//map to associate the set of line numbers
-
-typedef std::set<int> setQueryType ;
-typedef std::map<string, setQueryType> mapQueryType ;
-
-class QResult {
-//return the result of a query operation from textq
-//needs a print function
+class Message {
 
   public :
 
-    int timesOccured ;
-    std::vector <int> lineNumbers ;
-    std::vector <string> lines ;
+    explicit Message ( const string & str = "") : contents ( str )  {}
 
+    Message ( const Message &) ;
+    Message & operator= ( const Message & ) ;
 
+    ~Message() ;
+
+    void save ( Folder &);
+    void remove ( Folder & );
+
+  private :
+    string contents ;
+    std::set<Folder*> folders ;
+
+    void add_to_folders ( const Message &  ) ;
+    void remove_from_folders(  );
 };
 
-class TextQ {
-
-public :
-	TextQ ();
-	TextQ ( std::ifstream & inputFile ) {
+  Message::~Message () {
+    remove_from_folders();
 
 
+  }
 
-    if (!inputFile) {
-        cout << "Unable to open file";
-        exit(1); // terminate with error
-    }
-    
-    std::string line ;
-    std::string token ;
-    int lineNumber = 0 ;
+  
 
-    while ( std::getline ( inputFile, line )){
-      ++lineNumber ;
-      fileLines.push_back ( line ) ;
-      std::istringstream ss ( line ) ;
-      while ( std::getline ( ss, token, ' ' )) {
+  
 
-        //cout << token << endl ;
+  Message::Message( const Message & msg) : 
+    contents ( msg.contents ) , folders ( msg.folders)  {
+      add_to_folders ( msg );
+  }
 
-        if ( token == "the") cout << lineNumber << " " << line << endl << endl;
-        //setQueryType thisSet { lineNumber} ;
+  Message & Message::operator= ( const Message & rhs ) {
 
-        auto retSubMap = mainWordMap.insert ( { token, setQueryType ( {lineNumber}) }) ;
-        if ( !retSubMap.second) {
-          //cout << "Not a success" << endl ;
-          retSubMap.first->second.insert ( lineNumber);
-          //if ( token == "the") cout << "Insterted : " << *(retSubMap.first->second.end() - 1) << endl ;
-          if ( token == "the") cout << "Insterted : " << *(std::prev(retSubMap.first->second.end())) << endl ;
-          
-        }
-      }
-    }	
-	}
-//constructor : reads in the input ifstream file and makes each line into an element in the vector. Then it builds a map of every single word and a set for the line numbers on which is appears
-//holds vector for each line
-//hold map for each set
+    remove_from_folders ();
+    contents = rhs.contents ;
+    folders =  rhs.folders;
+    add_to_folders ( rhs );
+    return *this ;
+  }
 
-//query operation = look inside map to see if the word is there
-//if found = how often it occured, line numbers, and corresponding text
+  
 
-	QResult query ( string & searchString  ) {
+  class Folder {
 
-    QResult qr ;
+    public :
+      Folder () = default ;
+      Folder( Folder & ) ;
+      Folder & operator= ( const Folder & )  ;
 
-    cout << "Search String : " << searchString << endl;
+      void addMsg ( Message * msg ) ;
+      void removeMsg ( Message * msg ) ;
 
-    auto retSubMap = mainWordMap.find ( searchString) ;
+      ~Folder() ;
 
-    if ( retSubMap != mainWordMap.end()) {
-      qr.timesOccured = retSubMap->second.size () ;
-      //cout << qr.timesOccured << retSubMap->second[0]  ;
+    private :
 
+      std::set<Message*> msgs ;
+      void remove_msgs_in_folder ();
+  };
 
-      std::for_each ( retSubMap->second.begin(), retSubMap->second.end(), [&, this](int a ) { cout << "Query Line Number : " << a << endl ; qr.lineNumbers.push_back(a); qr.lines.push_back(fileLines[a - 1]);} );
-    } 
-    else {
-      cout << "Word does not exist" << endl;
+  Folder::Folder ( Folder & f ) : msgs ( f.msgs) {
 
+  }
 
-    }
+  Folder & Folder::operator= ( const Folder & rhs ) {
 
+    msgs.clear();
+    for ( auto msg : rhs.msgs)
+      this->msgs.insert ( msg ) ;
 
+    return *this ;
 
-    return qr ;
+  }
 
+  void Folder::addMsg ( Message * msg ) {
 
-	}
+    this->msgs.insert ( msg ) ;
+  }
 
-	private :
+  void Folder::removeMsg ( Message * msg ) {
+    this->msgs.erase ( msg ) ;
+  }
 
-		mapQueryType mainWordMap ; 
-    std::vector<string> fileLines ; 
+  void Folder::remove_msgs_in_folder () {
+    msgs.clear();
 
-//use a shared pointer because both classes will refer to the same data. Also must make sure that the TextQ object is still alive if a query is being performed
+  }
 
-};
+  void Message::save ( Folder & folder ) {
+    folders.insert(&folder);
+    folder.addMsg ( this );
+  }
 
+  void Message::remove ( Folder & folder ) {
+    folders.erase ( &folder );
+    folder.removeMsg ( this );
 
-std::ostream & print ( std::ostream &os, const QResult & qr){
-  int lineNumber = 0;
-  os << qr.timesOccured <<  endl << std::for_each ( qr.lines.begin(), qr.lines.end(), [] ( string a ) { cout << "line : " << a << endl << endl ;})  ;
-   return os;
-}
+  }
+
+  void Message::remove_from_folders ( ) {
+    for ( auto f : this->folders)
+      f->removeMsg(this);
+    this->folders.clear();
+  }
+
+  void Message::add_to_folders ( const Message & msg ) {
+    for ( auto f : msg.folders)
+      f->addMsg(this);
+
+  }
 
 int main ( void ) {
 
   try {
-  	std::ifstream ifs ("robot.txt", std::ifstream::in);
+    Message m1 ( "fff" );
 
-  	//infile is an ifstream
-
-  	//TextQ tq ( ifs) ;
-
-    auto p = std::make_shared < TextQ > ( TextQ(ifs) ) ;
-  	while ( true ) {
-  		cout << "enter word to look for, or q to quit : " ;
-
-      cout << endl <<  "QUERY RESULT :: " << endl ;
-  		string s ;
-  		if ( !(cin >> s) || s == "q" ) break;
-  		//run the query and print the results
-  		print ( cout , p->query ( s ) ) << endl ;
-  	}
-
-    ifs.close();
+    Message m2 ( m1 ) ;
 
 
+  	
   	}
 
 	catch ( std::exception ex) {
