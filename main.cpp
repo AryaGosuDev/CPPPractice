@@ -27,134 +27,114 @@ using std::for_each;
 using std::vector;
 using std::list;
 
-class Folder ;
-
-class Message {
+class StrVec {
 
   public :
 
-    explicit Message ( const string & str = "") : contents ( str )  {}
+    StrVec() :
+      elements(0), ff(0) , cap(0) { }
 
-    Message ( const Message &) ;
-    Message & operator= ( const Message & ) ;
+    StrVec ( std::initializer_list<string> il ) :
+      elements(0), ff(0) , cap(0) {
+        for ( const auto & str : il )
+          push_back ( str );
+      }
 
-    ~Message() ;
+    bool push_back ( const string &);
 
-    void save ( Folder &);
-    void remove ( Folder & );
+    size_t capacity() const { return cap - elements ;}
+    size_t size() const { return ff - elements ;}
+    string * begin() const { return elements ;}
+    string * end() const { return ff ; }
+
+    ~StrVec();
 
   private :
-    string contents ;
-    std::set<Folder*> folders ;
 
-    void add_to_folders ( const Message &  ) ;
-    void remove_from_folders(  );
+    void chk_n_alloc ()
+      { if ( size() == capacity()) reallocate() ;}
+
+    void reallocate() ;
+
+    string * elements ;
+    string * ff;
+    string * cap ;
+
 };
 
-  Message::~Message () {
-    remove_from_folders();
-
-
+StrVec::~StrVec () {
+  cout << "Entered ~StrVec() : " ;
+  if ( elements ) {
+    std::for_each ( this->begin(), this->end(), [](string & a) { (&a)->~string();}); 
+    std::free ( elements );
+    cout << "Destroy successful" << endl;
   }
+}
 
+bool StrVec::push_back ( const string & str ) {
+  chk_n_alloc();
+
+  cout << "Here : " << ff << " : " << size() << " : " << capacity() << endl;
+
+  ff = new(ff) string (str);
+  ++ff;
+
+  cout << "Here4 : " << *ff << endl;
+
+  cout << "Here3" << endl;
+
+  return 1;
+}
+
+void StrVec::reallocate() {
+
+  cout << "Entered reallocate()" << endl;
+
+  auto newCapacity = size() ? size() * 2 : 1 ;
   
+  string * newData = (string*)std::malloc( newCapacity * sizeof(string ));
 
+  if ( !newData) {
+    std::cerr << "Could not allocate memory in reallocate()" << endl;
+    return ;
+  }
+
+  auto dest = newData ;
+  auto startElementsOld = elements ;
+
+  for ( ; ff - startElementsOld > 0 ; ++startElementsOld ) { 
+    dest = new(dest) string (*startElementsOld);
+    dest++;
+    //*dest++ = *startElementsOld;
+    cout << "Copied : "<< *dest  << endl;
+  }
   
+  std::for_each ( this->begin(), this->end(), [](string & a) { (&a)->~string();}); 
+  std::free(elements) ;
 
-  Message::Message( const Message & msg) : 
-    contents ( msg.contents ) , folders ( msg.folders)  {
-      add_to_folders ( msg );
-  }
+  elements = newData ;
+  ff = dest;
 
-  Message & Message::operator= ( const Message & rhs ) {
-
-    remove_from_folders ();
-    contents = rhs.contents ;
-    folders =  rhs.folders;
-    add_to_folders ( rhs );
-    return *this ;
-  }
-
-  
-
-  class Folder {
-
-    public :
-      Folder () = default ;
-      Folder( Folder & ) ;
-      Folder & operator= ( const Folder & )  ;
-
-      void addMsg ( Message * msg ) ;
-      void removeMsg ( Message * msg ) ;
-
-      ~Folder() ;
-
-    private :
-
-      std::set<Message*> msgs ;
-      void remove_msgs_in_folder ();
-  };
-
-  Folder::Folder ( Folder & f ) : msgs ( f.msgs) {
-
-  }
-
-  Folder & Folder::operator= ( const Folder & rhs ) {
-
-    msgs.clear();
-    for ( auto msg : rhs.msgs)
-      this->msgs.insert ( msg ) ;
-
-    return *this ;
-
-  }
-
-  void Folder::addMsg ( Message * msg ) {
-
-    this->msgs.insert ( msg ) ;
-  }
-
-  void Folder::removeMsg ( Message * msg ) {
-    this->msgs.erase ( msg ) ;
-  }
-
-  void Folder::remove_msgs_in_folder () {
-    msgs.clear();
-
-  }
-
-  void Message::save ( Folder & folder ) {
-    folders.insert(&folder);
-    folder.addMsg ( this );
-  }
-
-  void Message::remove ( Folder & folder ) {
-    folders.erase ( &folder );
-    folder.removeMsg ( this );
-
-  }
-
-  void Message::remove_from_folders ( ) {
-    for ( auto f : this->folders)
-      f->removeMsg(this);
-    this->folders.clear();
-  }
-
-  void Message::add_to_folders ( const Message & msg ) {
-    for ( auto f : msg.folders)
-      f->addMsg(this);
-
-  }
+  cap = elements + newCapacity;
+}
 
 int main ( void ) {
 
   try {
-    Message m1 ( "fff" );
 
-    Message m2 ( m1 ) ;
+    StrVec strv1 ( {"Her?", "Him?", "Don't call it that"}) ;
+    //if ( strv1.push_back( "Her?") ) std::cerr << "Push successful" << endl << endl;
+    //if ( strv1.push_back( "Him?") ) std::cerr << "Push successful" << endl << endl;
+    //if ( strv1.push_back( "Don't call it that") ) std::cerr << "Push successful" << endl << endl;
 
+    for ( auto str : strv1)
+      cout << str << " : " ;
+    cout << endl;
 
-  	
+    cout << "Size of StrVec : " << strv1.size() << " : Capacity of StrVec : " << strv1.capacity() << endl;
+
+    return 0;
+
   	}
 
 	catch ( std::exception ex) {
