@@ -40,14 +40,25 @@ class StrVec {
           push_back ( str );
       }
 
+    StrVec(  StrVec && ) noexcept ;
+    StrVec & operator= ( StrVec && ) ;
+
+    ~StrVec();
+
+  public :
+
     bool push_back ( const string &);
+    void print () {
+      for_each ( this->begin(), this->end(), [](string & a ) { cout << a << " : " ;});
+      cout << endl;
+    }
 
     size_t capacity() const { return cap - elements ;}
     size_t size() const { return ff - elements ;}
     string * begin() const { return elements ;}
     string * end() const { return ff ; }
 
-    ~StrVec();
+    
 
   private :
 
@@ -56,14 +67,43 @@ class StrVec {
 
     void reallocate() ;
 
+  private:
+    //data members
     string * elements ;
     string * ff;
     string * cap ;
 
 };
 
+StrVec::StrVec( StrVec && rhs) noexcept {
+
+    cout << "Entered move constructor" << endl;
+    elements = rhs.elements ;
+    ff = rhs.ff ;
+    cap = rhs.cap;
+
+    rhs.cap = rhs.ff = rhs.elements = 0;
+}
+
+StrVec & StrVec::operator = ( StrVec && rhs ) {
+
+  cout << "Entered move assignment operator" << endl;
+  if ( this != &rhs ){
+    std::for_each ( this->begin(), this->end(), [](string & a) { (&a)->~string();}); 
+    std::free ( elements );
+
+    elements = rhs.elements ;
+    ff = rhs.ff ;
+    cap = rhs.cap;
+
+    rhs.cap = rhs.ff = rhs.elements = 0;
+  }
+
+  return *this;
+}
+
 StrVec::~StrVec () {
-  cout << "Entered ~StrVec() : " ;
+  cout << "Entered ~StrVec() : " << endl ;
   if ( elements ) {
     std::for_each ( this->begin(), this->end(), [](string & a) { (&a)->~string();}); 
     std::free ( elements );
@@ -121,15 +161,25 @@ void StrVec::reallocate() {
 int main ( void ) {
 
   try {
-
+    using std::move ;
     StrVec strv1 ( {"Her?", "Him?", "Don't call it that"}) ;
     //if ( strv1.push_back( "Her?") ) std::cerr << "Push successful" << endl << endl;
     //if ( strv1.push_back( "Him?") ) std::cerr << "Push successful" << endl << endl;
     //if ( strv1.push_back( "Don't call it that") ) std::cerr << "Push successful" << endl << endl;
 
-    for ( auto str : strv1)
-      cout << str << " : " ;
-    cout << endl;
+    strv1.print();
+
+    StrVec strv2 ( move(strv1));
+
+    strv2.print ();
+
+    StrVec strv3;
+    strv3 = move(strv2) ;
+
+    strv2.print ();
+
+    strv3.print();
+
 
     cout << "Size of StrVec : " << strv1.size() << " : Capacity of StrVec : " << strv1.capacity() << endl;
 
