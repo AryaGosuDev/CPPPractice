@@ -1,4 +1,4 @@
-#include "Sales_data.h"
+//#include "Sales_data.h"
 
 #include <string>
 #include <iostream>
@@ -27,29 +27,56 @@ using std::for_each;
 using std::vector;
 using std::list;
 
-class StrBlob {
-  typedef std::vector<std::string>::size_type size_type;
-  StrBlob();
-  StrBlob(std::initializer_list<string> il );
-  size_type size() const {return data->size();}
-  bool empty() const { return data->empty();}
+class Sales_data {
 
-  void push_back(const string &t ) & { data->push_back(t);}
-  void push_back( string && rhs ) && { data->push_back(rhs);}
-  void pop_back();
+  friend std::istream & read (std::istream &, Sales_data & ); 
+  friend std::ostream & print ( std::ostream &, const Sales_data & );
 
-  string & front();
-  string & back();
+  public :
+    Sales_data() = default ;
+    Sales_data ( const string &s ) : bookNo(s) {}
+    Sales_data (std::istream & );
+    string isbn() const { return bookNo;}
+    Sales_data & combine ( const Sales_data & ) ;
 
   private :
-    std::shared_ptr<std::vector<string>> data;
-
-    void check ( size_type i, const string & msg ) const;
+    double avg_price() const { return units_sold ? rev / units_sold : 0 ;}
+    string bookNo;
+    unsigned units_sold = 0;
+    double rev = 0.0 ;
+    double price = 0;
+    
 };
+
+
+std::istream & read ( std::istream & is , Sales_data & item ){
+
+  is >> item.bookNo >> item.units_sold >> item.price ;
+  //if ( is )
+    item.rev = item.units_sold * item.price ;
+  //else
+    //item = Sales_data();
+
+  return is;
+}
+
+
+std::ostream & print ( std::ostream &os, const Sales_data & item){
+  os << item.isbn() << " " << item.units_sold << " " << item.price <<
+   " " << item.rev << " " << item.avg_price() << std::endl ;
+   return os;
+}
+
+
 
 int main ( void ) {
 
   try {
+    Sales_data d1 ;
+    read ( std::cin , d1 );
+
+    print ( cout , d1 );
+
     
     return 0;
 
