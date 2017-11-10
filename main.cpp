@@ -1,4 +1,6 @@
 //#include "Sales_data.h"
+//#include "StrBlob.h"
+//#include "StrBlobPtr.h"
 
 #include <string>
 #include <iostream>
@@ -27,56 +29,124 @@ using std::for_each;
 using std::vector;
 using std::list;
 
-class Sales_data {
+class StrBlob {
 
-  friend std::istream & read (std::istream &, Sales_data & ); 
-  friend std::ostream & print ( std::ostream &, const Sales_data & );
+  friend class StrBlobPtr;
 
   public :
-    Sales_data() = default ;
-    Sales_data ( const string &s ) : bookNo(s) {}
-    Sales_data (std::istream & );
-    string isbn() const { return bookNo;}
-    Sales_data & combine ( const Sales_data & ) ;
+    typedef std::vector<std::string>::size_type size_type ;
+    StrBlob();
+    StrBlob(std::initializer_list<std::string> il ) : data(std::make_shared<vector<string>>(il)) {};
+    size_type size() const { return data->size() ;}
+    bool empty() const { return data->empty() ;}
+
+    void push_back( const std::string &t ) {data->push_back(t); }
+    void pop_back();
+
+    std::string & front();
+    std::string & back();
+
+  private:
+
+    std::shared_ptr<std::vector<std::string>> data;
+    void check(size_type i , const std::string & msg ) const ;
+};
+
+class StrBlobPtr  {
+  public :
+
+    StrBlobPtr() : curr ( 0 ) {} 
+    StrBlobPtr(StrBlob & a, size_t  sz = 0 ) :
+      wptr ( a.data) , curr (sz ) {}
+
+    std::string & deref() const ;
+    StrBlobPtr & incr() ;
+
+    StrBlobPtr & operator++();
+    StrBlobPtr & operator--();
+    StrBlobPtr & operator++(int);
+    StrBlobPtr & operator--(int);
+
+    StrBlobPtr & operator+ ( );
+
+    std::string & operator*() const {
+      auto p = check ( curr, "deref past end");
+      return (*p)[curr];
+    }
+
+    std::string * operator->() const {
+        return & this->operator*() ;
+
+    }
 
   private :
-    double avg_price() const { return units_sold ? rev / units_sold : 0 ;}
-    string bookNo;
-    unsigned units_sold = 0;
-    double rev = 0.0 ;
-    double price = 0;
-    
+
+    std::shared_ptr<std::vector<std::string>>
+      check(std::size_t, const std::string & ) const ;
+
+    std::weak_ptr<std::vector<std::string>> wptr ;
+    std::size_t curr ;
+};
+
+class StrBlobPtrPtr {
+
+  public :
+
+    StrBlobPtrPtr() {};
+    StrBlobPtrPtr(StrBlobPtr & a ) : ptr ( &a) {} ;
+
+    StrBlobPtr & operator*() const {
+      return *ptr;
+
+    }
+
+    StrBlobPtr * operator->() const {
+      return ptr ;
+    }
+
+  private :
+
+    StrBlobPtr * ptr ;
+  
 };
 
 
-std::istream & read ( std::istream & is , Sales_data & item ){
-
-  is >> item.bookNo >> item.units_sold >> item.price ;
-  //if ( is )
-    item.rev = item.units_sold * item.price ;
-  //else
-    //item = Sales_data();
-
-  return is;
+void StrBlob::check ( size_type i, const string & msg ) const {
+  if ( i >= data->size() )
+    throw std::out_of_range(msg );
 }
 
+std::shared_ptr<std::vector<std::string>>
+StrBlobPtr::check ( std::size_t i, const std::string & msg ) const {
 
-std::ostream & print ( std::ostream &os, const Sales_data & item){
-  os << item.isbn() << " " << item.units_sold << " " << item.price <<
-   " " << item.rev << " " << item.avg_price() << std::endl ;
-   return os;
+  auto ret = wptr.lock () ;
+  if ( !ret )
+    throw std::runtime_error ( "unbound StrBlobPtr") ;
+  if ( i >= ret->size())
+    throw std::out_of_range(msg) ;
+  return ret ;
 }
 
-
+StrBlobPtr & StrBlobPtr::operator++() {
+  check( curr, "passed end ");
+  ++curr ;
+  return *this ;
+}
 
 int main ( void ) {
 
   try {
-    Sales_data d1 ;
-    read ( std::cin , d1 );
 
-    print ( cout , d1 );
+    StrBlob a1 = {"hi", "bye", "now"};
+    StrBlobPtr p ( a1 ) ;
+    *p = "okay";
+    cout << p->size() << endl;
+    cout << (*p).size() << endl;
+    cout << *p << endl;
 
+    StrBlobPtrPtr pp1 ( p );
+
+    cout << (*pp1)->size() << endl;
     
     return 0;
 
