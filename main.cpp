@@ -29,125 +29,44 @@ using std::for_each;
 using std::vector;
 using std::list;
 
-class StrBlob {
-
-  friend class StrBlobPtr;
-
-  public :
-    typedef std::vector<std::string>::size_type size_type ;
-    StrBlob();
-    StrBlob(std::initializer_list<std::string> il ) : data(std::make_shared<vector<string>>(il)) {};
-    size_type size() const { return data->size() ;}
-    bool empty() const { return data->empty() ;}
-
-    void push_back( const std::string &t ) {data->push_back(t); }
-    void pop_back();
-
-    std::string & front();
-    std::string & back();
-
-  private:
-
-    std::shared_ptr<std::vector<std::string>> data;
-    void check(size_type i , const std::string & msg ) const ;
-};
-
-class StrBlobPtr  {
-  public :
-
-    StrBlobPtr() : curr ( 0 ) {} 
-    StrBlobPtr(StrBlob & a, size_t  sz = 0 ) :
-      wptr ( a.data) , curr (sz ) {}
-
-    std::string & deref() const ;
-    StrBlobPtr & incr() ;
-
-    StrBlobPtr & operator++();
-    StrBlobPtr & operator--();
-    StrBlobPtr & operator++(int);
-    StrBlobPtr & operator--(int);
-
-    StrBlobPtr & operator+ ( );
-
-    std::string & operator*() const {
-      auto p = check ( curr, "deref past end");
-      return (*p)[curr];
-    }
-
-    std::string * operator->() const {
-        return & this->operator*() ;
-
-    }
-
-  private :
-
-    std::shared_ptr<std::vector<std::string>>
-      check(std::size_t, const std::string & ) const ;
-
-    std::weak_ptr<std::vector<std::string>> wptr ;
-    std::size_t curr ;
-};
-
-class StrBlobPtrPtr {
-
-  public :
-
-    StrBlobPtrPtr() {};
-    StrBlobPtrPtr(StrBlobPtr & a ) : ptr ( &a) {} ;
-
-    StrBlobPtr & operator*() const {
-      return *ptr;
-
-    }
-
-    StrBlobPtr * operator->() const {
-      return ptr ;
-    }
-
-  private :
-
-    StrBlobPtr * ptr ;
+template < typename T > bool compare ( const T a, const T b ) {
   
-};
+  return a > b ;
 
-
-void StrBlob::check ( size_type i, const string & msg ) const {
-  if ( i >= data->size() )
-    throw std::out_of_range(msg );
 }
 
-std::shared_ptr<std::vector<std::string>>
-StrBlobPtr::check ( std::size_t i, const std::string & msg ) const {
+template < typename T , typename U> int findThis ( T first, T last, U valToFind ) {
+  
+  //for_each ( p.begin(), p.end(), [valToFind](T a ) { cout << a << endl; if ( a == valToFind) return 1 ;}  );
 
-  auto ret = wptr.lock () ;
-  if ( !ret )
-    throw std::runtime_error ( "unbound StrBlobPtr") ;
-  if ( i >= ret->size())
-    throw std::out_of_range(msg) ;
-  return ret ;
+  for (  ; first != last; ++ first ) {
+
+    if ( (*first) == valToFind ) return 1 ;
+  }
+  return 0;
 }
 
-StrBlobPtr & StrBlobPtr::operator++() {
-  check( curr, "passed end ");
-  ++curr ;
-  return *this ;
+template <typename T, unsigned M> int print ( T (&p)[M]) {
+
+  for ( int i = 0; i < M ; i++) cout << p[i] << endl ;
+  
+  return 1;
 }
+
 
 int main ( void ) {
 
   try {
 
-    StrBlob a1 = {"hi", "bye", "now"};
-    StrBlobPtr p ( a1 ) ;
-    *p = "okay";
-    cout << p->size() << endl;
-    cout << (*p).size() << endl;
-    cout << *p << endl;
+    //cout << compare ( 1 , 2 ) << endl ;
 
-    StrBlobPtrPtr pp1 ( p );
+    string findS = "g" ;
 
-    cout << (*pp1)->size() << endl;
-    
+    vector<string> thisVec = {"fff", "g", "h", "j" };
+    //cout << findThis ( thisVec.begin(), thisVec.end(), findS) << endl;
+    int p{4444, 3, 4 , 4} ;
+    print(p );
+
     return 0;
 
   	}
