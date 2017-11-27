@@ -99,7 +99,7 @@ class Blob {
 
   typedef typename vector<T>::size_type size_type ;
 
-  Blob<T>();
+  Blob<T>() = default ;
   Blob<T>(std::initializer_list<T> il );
   
   size_type size() const { return data->size();}
@@ -115,7 +115,7 @@ class Blob {
 
     //std::shared_ptr<vector<T>> data;
 
-    my_shared_ptr<std::vector<T>, DebugDelete> data;
+    my_shared_ptr<std::vector<T>> data;
 
     void check ( size_type i, const T & msg) const ;
 
@@ -147,20 +147,9 @@ int main ( void ) {
 
   try {
 
-    int * p = new int(5);
-    DebugDelete dd;
-    dd (p);
-
-    int * ip = new int(5);
-
-    my_shared_ptr<int, DebugDelete> p_shared( ip[0], new DebugDelete());
-
-    cout << p_shared.returnRefCount() << endl;
-
-    my_shared_ptr<int, DebugDelete> newShared ( my_shared_ptr<int, DebugDelete>::my_make_shared ( p_shared ));
-
-    cout << newShared.returnRefCount() << endl;
-
+    Blob<string> myBlob ;
+    myBlob.push_back ( "hi");
+    myBlob.push_back ( "bye");
     return 0;
 
   	}
