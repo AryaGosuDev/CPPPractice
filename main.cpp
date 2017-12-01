@@ -142,14 +142,37 @@ class BlobPtr {
   size_t curr;
 };
 
+template <typename ... Args > 
+void foo ( Args ... args) {
+
+  cout << sizeof...(Args) << endl ;
+  cout << sizeof...(args) << endl ;
+
+}
+
+template < typename T >
+std::ostream & print ( std::ostream &os, const T &t) {
+
+  return os << t ;
+}
+
+template < typename T, typename ... Args >
+std::ostream & print ( std::ostream & os, const T & t, const Args & ... rest) {
+
+  os << t << ", " ;
+  return print ( os, rest ... );
+}
 
 int main ( void ) {
 
   try {
 
-    Blob<string> myBlob ;
-    myBlob.push_back ( "hi");
-    myBlob.push_back ( "bye");
+    int i = 0;
+    double d = 3.14;
+    string s = "jon arya snow" ;
+
+    print ( cout, i, s, 42 );
+
     return 0;
 
   	}
