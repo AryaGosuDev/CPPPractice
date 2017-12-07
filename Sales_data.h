@@ -41,10 +41,13 @@ class Sales_data {
 	friend std::istream & read (std::istream &, Sales_data & );
 	friend std::ostream & print ( std::ostream &, const Sales_data & );
 
+	friend class std::hash<Sales_data> ;
+	friend bool operator== ( const Sales_data &, const Sales_data &) ;
+
 public :
 
 	Sales_data() = default ;
-	Sales_data( std::istream & is = std::cin, std::string thisStr = "defStr" );
+	Sales_data( std::istream & is , std::string thisStr = "defStr" );
 	Sales_data( int inI) : Sales_data ( std::cin ) { std::cout << "Run int const" << std::endl;}
 
 	std::string isbn() const { return bookNo;}
@@ -54,6 +57,8 @@ public :
 		revenue += rhs.revenue;
 		return *this;
 	}
+
+	
 
 private :
 
@@ -88,8 +93,15 @@ Sales_data add ( const Sales_data & lhs, const Sales_data & rhs){
 	return sum;
 }
 
-Sales_data::Sales_data ( std::istream & is, std::string thisStr )
-{
+bool operator== ( const Sales_data & x, const Sales_data & y ) {
+
+	return x.units_sold == y.units_sold &&
+		   x.price == y.price &&
+		   x.revenue == y.revenue ;
+
+}
+
+Sales_data::Sales_data ( std::istream & is, std::string thisStr ){
 	std::cout << " Delegating constructor executed : " << thisStr << std::endl;
 	read ( is, *this );
 }
