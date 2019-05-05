@@ -1,4 +1,4 @@
-#include "Sales_data.h"
+//#include "Sales_data.h"
 //#include "StrBlob.h"
 //#include "StrBlobPtr.h"
 
@@ -31,47 +31,40 @@ using std::for_each;
 using std::vector;
 using std::list;
 
-namespace std {
+#include <string>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 
-  template <>
-  struct hash<Sales_data> {
+class A {
+public :
+  class B ;
 
-    typedef size_t result_type ;
-    typedef Sales_data argument_type;
+  void query ( B b) {
 
-    size_t operator() ( const Sales_data & s ) const;
-
-  };
-
-  size_t hash<Sales_data>::operator() ( const Sales_data & s ) const {
-      cout << "hash<Sales_data operator()" << endl ;
-      return hash<string>()(s.bookNo) ^
-             hash<unsigned>()(s.units_sold) ^
-             hash<double>()(s.revenue) ;
+    int i = b.i;
   }
-}
 
-class exceptionType {
-
+private :
 
 };
 
+class A::B {
 
+public :
+
+  B () { i = 4 ;}
+  int i ;
+
+};
 
 int main ( void ) {
 
   try {
 
-    //std::unordered_multiset<Sales_data> SDset ;
 
-    //SDset.insert(Sales_data());
-
-    exceptionType * ex = new exceptionType() ;
-    throw ex;
-    
     return 0;
-  	}
-catch ( exceptionType * p ) {} 
+  } 
 	catch ( std::exception ex) {
 		cout << "Error : " << ex.what() << endl ;
 	}
