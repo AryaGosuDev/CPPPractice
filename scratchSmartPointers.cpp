@@ -8,81 +8,129 @@ using std::shared_ptr ;
 using std::vector ;
 using std::unique_ptr ;
 
-template < typename T, typename LL_Delete_Function_Type, typename LLNode_Delete_Function_Type >
+template <typename T>
 class Shared_LL {
-      class LLNode {
-        friend class Shared_LL ;
-        public :
-          LLNode () =  default ;
-          LLNode ( T _data , bool _visited = false , unique_ptr < LLNode > _next = NULL ) :
-            data ( new T (_data ) ) , visited ( _visited ) , next ( _next ) { }
-          LLNode ( T * _data , bool _visited = false , unique_ptr < LLNode > _next = NULL ) :
-            data ( _data ) , visited ( _visited ) , next ( _next ) { }
-          ~LLNode () {
-            LL_Node_Delete () ;
-          }
-        private :
-          T * data ;
-          bool visited ;
-          unique_ptr<LLNode > next ;
-          LLNode_Delete_Function_Type LL_Node_Delete ;
-  };
-  typedef std::pair<Shared_LL & , bool > shared_LL_Return_Pair ;
+  typedef std::pair<Shared_LL &, bool> Shared_LL_return ;
+  public :
+    class LLNode {
+      friend class Shared_LL ;
+      public :
+        LLNode() = default ;
+        LLNode( T _data ) : data ( new T(_data)) {} 
+        ~LLNode() {
+          cout << "Deleting LLNode " << endl ;
+        }
+      private :
+        unique_ptr<LLNode> next ;
+        T * data ;
+    };
   private :
-    unique_ptr<LLNode > root ;
-    LL_Delete_Function_Type LL_Delete ;
-    LLNode_Delete_Function_Type LL_Node_Delete ;
+    int size ;
+    unique_ptr<LLNode> root ;
     LLNode * head ;
-    LLNode * current ;
     LLNode * tail ;
   public :
-    Shared_LL () = default ;
-    explicit Shared_LL ( LL_Delete_Function_Type _f, LLNode_Delete_Function_Type _f_Node ) : LL_Delete ( _f ) , LL_Node_Delete ( _f_Node ) {
-      root = unique_ptr<LLNode> (new LLNode(NULL) , _f_Node ) ;
-      tail = current = head = root.get() ;
+    Shared_LL () : size ( 0 ) , head ( NULL), tail ( NULL ) {} 
+    explicit Shared_LL ( const T & _data ) : Shared_LL() {
+      root.release() ;
+      root = unique_ptr<LLNode> ( new LLNode(_data)) ;
+      tail = head = root.get() ;
+      size++ ;
     }
-    explicit Shared_LL ( T * _data, LL_Delete_Function_Type _f, LLNode_Delete_Function_Type _f_Node ) : Shared_LL ( _f, _f_Node ) {
-      root.reset () ;
-      root = unique_ptr < LLNode > ( new LLNode ( _data), _f_Node ) ;
-      tail = current = head = root.get() ;
-    }
-    explicit Shared_LL ( T _data, LL_Delete_Function_Type _f , LLNode_Delete_Function_Type _f_Node ) :
-      Shared_LL ( new T ( _data ), _f, _f_Node ) {}
+    ~Shared_LL () {
+      cout << "Deleting LL " << endl;
 
-    Shared_LL & add ( T * _data ) {
+    }
+    Shared_LL_return add ( T & _data ) {
       LLNode * currentLastNode = tail ;
-      currentLastNode->next = unique_ptr<LLNode> ( new LLNode ( _data, false, NULL) , LL_Node_Delete ) ;
-      tail = currentLastNode->next.get() ;
+      currentLastNode->next = unique_ptr<LLNode> ( new LLNode(_data));
+      tail = currentLastNode->next.get();
+      size++ ;
+      return Shared_LL_return ( *this, true ) ;
     }
-
-    shared_LL_Return_Pair removeNode ( T & _dataToDelete) {
-      if ( *(head->data) == _dataToDelete ) {
-        LLNode * tempHead = head ;
-        root.release () ;
-        root = unique_ptr<LLNode>(tempHead->next.get(), LL_Node_Delete);
-        tempHead->next.release();
-        delete tempHead ;
-        return shared_LL_Return_Pair( *this, true );
+    Shared_LL_return add ( T && _data ) {
+      LLNode * currentLastNode = tail ;
+      currentLastNode->next = unique_ptr<LLNode> ( new LLNode(_data));
+      tail = currentLastNode->next.get();
+      size++ ;
+      return Shared_LL_return ( *this, true ) ;
+    }
+    Shared_LL_return removeLastNode () {
+      if ( size == 0 ) return Shared_LL_return( *this, false ) ;
+      LLNode * tempCurrent = head ;
+      LLNode * tempPrevious = NULL ;
+      while ( tempCurrent->next.get() != NULL ) { tempPrevious = tempCurrent ; tempCurrent = tempCurrent->next.get() ; }
+      if ( tempPrevious == NULL ) {
+        root.release() ;
+        tempCurrent->next.release() ;
+        delete tempCurrent ;
+        head = tail = NULL ;
+        --size;
+        return Shared_LL_return ( *this, true );
       }
-      LLNode * currentTemp = head ;
-      while ( currentTemp->next != NULL && *(currentTemp->next.get()->data) != _dataToDelete ) {
-        currentTemp = currentTemp->next.get() ;
+      if ( tempCurrent != tail) throw std::runtime_error ( "Improper LL structure");
+      tempPrevious->next.release() ;
+      tempCurrent->next.release();
+      delete tempCurrent ;
+      size--;
+      tail = tempPrevious ;
+      return Shared_LL_return ( *this, true);
+    }
+    Shared_LL_return removeNode ( LLNode * _nodeToRemove, LLNode * _nodePrevious) {
+      if ( _nodeToRemove == NULL ) return Shared_LL_return ( *this, false );
+      if ( _nodeToRemove == head) {
+        root.release() ;
+        root = unique_ptr<LLNode> ( head->next.get());
+        head->next.release() ;
+        delete head ;
+        --size;
+        head = root.get();
+        if ( size == 0) tail = root.get() ;
+        return Shared_LL_return ( *this,true );
       }
-      if ( currentTemp->next != NULL) {
-        LLNode * tempNodeToDelete = currentTemp->next.get() ;
-        currentTemp->next.release() ;
-        currentTemp->next = unique_ptr<LLNode>(tempNodeToDelete->next.get(), LL_Node_Delete);
-        tempNodeToDelete->next.release() ;
-        delete tempNodeToDelete ;
-        return shared_LL_Return_Pair( *this, true );
+      _nodePrevious->next.release() ;
+      _nodePrevious->next = unique_ptr<LLNode> ( _nodeToRemove->next.get());
+      _nodeToRemove->next.release() ;
+      if ( _nodeToRemove->next.get() == NULL ) tail = _nodePrevious ;
+      delete _nodeToRemove ;
+      size--;
+      return Shared_LL_return ( *this, true );
+    }
+    Shared_LL_return removeValue ( const T &  _data ) {
+      if ( head == NULL ) return Shared_LL_return ( *this, false);
+      if ( head == tail && *head->data == _data) return removeLastNode() ;
+      LLNode * tempCurrent = head ;
+      LLNode * tempPrevious = NULL ;
+      while ( tempCurrent != NULL && *tempCurrent->data != _data) {
+        tempPrevious = tempCurrent ;
+        tempCurrent = tempCurrent->next.get() ;
       }
-      return shared_LL_Return_Pair( *this, false  );
+      return removeNode ( tempCurrent, tempPrevious ) ;
+    }
+    Shared_LL_return printLL () {
+      LLNode * tempCurrent = head ;
+      cout << "Printing LL : " << endl;
+      while ( tempCurrent != NULL ) {
+        cout << *tempCurrent->data << endl;
+        tempCurrent = tempCurrent->next.get() ;
+      }
+      return Shared_LL_return ( *this, true );
     }
 };
 
 int main() {
-  int a = 0 ;
-  auto f = [] ( ) { cout << "this " << endl;} ;
-  cout << typeid ( f ).name ()  << endl;
-  return 0;
+  try {
+    unique_ptr<Shared_LL<int>> p = unique_ptr<Shared_LL<int>>(new Shared_LL<int>(4)) ;
+    p->add(5).first.add(6).first.add(7).first.removeValue(5 ) ;
+    
+    p->printLL() ;
+    p->printLL() ;
+
+  }
+  catch ( std::exception ex ) {
+    cout << "Error : " << ex.what() << endl;
+  }
+
+  return 0 ;
+
 }
