@@ -8,6 +8,9 @@ using std::shared_ptr ;
 using std::vector ;
 using std::unique_ptr ;
 
+/************** Self Deleting Linked List Data Structure ***************
+************************************************************************/
+
 template <typename T>
 class Shared_LL {
   typedef std::pair<Shared_LL &, bool> Shared_LL_return ;
