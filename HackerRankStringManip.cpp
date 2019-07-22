@@ -8,81 +8,43 @@
 
 using namespace std ;
 
-unsigned nChoosek( unsigned n, unsigned k ){
-    if (k > n) return 0;
-    if (k * 2 > n) k = n-k;
-    if (k == 0) return 1;
-
-    int result = n;
-    for( int i = 2; i <= k; ++i ) {
-        result *= (n-i+1);
-        result /= i;
-    }
-    return result;
+inline int returnArithSum ( int n , int a1, int aN ) {
+    return (double)n * ( (double)(a1 + aN ) / 2.0 ) ;
 }
 
-string isValid(string s) {
+// Complete the substrCount function below.
+long substrCount(int n, string s) {
+    using SubstrNode = pair<char,int>;
+    long substrCount = 0;
+    int size = 0 ;
+    SubstrNode * substrArray = new SubstrNode[n] ;
+    substrArray[size] = SubstrNode( s[0], 0);
 
-	unordered_map <char, int> charCountMap = {} ;
+    for ( auto & charVal : s ) {
+    	if ( substrArray[size].first == charVal) substrArray[size].second ++ ;
+    	else {
+    			size++ ;
+    			substrArray[size].first = charVal ;
+    			substrArray[size].second ++ ;
+    	}
+    }
 
-	for ( auto & charVal : s ) charCountMap[charVal]++ ;
-
-	for ( auto & val : charCountMap ) cout << val.first << " " << val.second << endl ;
-
-	bool removeUsed = false ;
-
-	int pastVal = -1, newVal = -1, counter = 0 ;
-
-	auto it = charCountMap.begin() ;
-
-	while ( it != charCountMap.end()) {
-
-		newVal = (*it).second;
-
-		cout << "Past : " << pastVal << " : newVal : " << newVal << endl ;
-
-		if ( pastVal == -1 ) pastVal = (*it).second ;
-		else {
-			if ( newVal != pastVal) {
-				if ( removeUsed == true ) return "NO" ;
-				removeUsed = true ;
-				if ( counter == 1 && newVal == 1) {
-					
-					if ( pastVal == 2 && (*(next(it,1))).second > 2 ) return "NO" ;
-					else if ( pastVal > 2) {} 
-					else pastVal = -1 ; 
-				}
-				else if ( counter == 1 && pastVal == 1 ) {
-					if ( newVal == 2 && (*(next(it,1))).second > 2) return "NO" ;
-					else if ( newVal > 2) { pastVal = newVal ;}
-					else pastVal = -1 ;
-				}
-				else if ( pastVal == 1 ) {
-					if ( newVal > 2 ) return "NO" ;
-				}
-				else if ( newVal == 1 ) {}
-				else if ( abs ( newVal - pastVal) > 1) return "NO" ;
-				else if ( newVal > pastVal) {}
-				else if ( pastVal > newVal ) {
-					if ( counter > 1) return "NO" ;
-					else pastVal = newVal ;
-				}
-			}
-		}
-		counter	 ++ ;
-		cout << "Counter : " << counter << endl ;
-		it = next ( charCountMap.begin(), counter );
-	}
-	return "YES" ;
+    for ( int i = 0 ; i <= size ; ++ i ) {
+    	cout << substrArray[i].first << " : " << substrArray[i].second << endl;
+    	substrCount += returnArithSum ( substrArray[i].second, 1, substrArray[i].second);
+    	if ( substrArray[i].second == 1 && i - 1 >= 0 && i + 1 <= size && substrArray[i-1].first == substrArray[i+1].first) substrCount += min(substrArray[i-1].second , substrArray[i+1].second) ;
+    }
+    delete [] substrArray;
+    return substrCount;
 }
 
 int main () {
 
-	string testString = "ibfdgaeadiaefgbhbdghhhbgdfgeiccbiehhfcggchgghadhdhagfbahhddgghbdehidbibaeaagaeeigffcebfbaieggabcfbiiedcabfihchdfabifahcbhagccbdfifhghcadfiadeeaheeddddiecaicbgigccageicehfdhdgafaddhffadigfhhcaedcedecafeacbdacgfgfeeibgaiffdehigebhhehiaahfidibccdcdagifgaihacihadecgifihbebffebdfbchbgigeccahgihbcbcaggebaaafgfedbfgagfediddghdgbgehhhifhgcedechahidcbchebheihaadbbbiaiccededchdagfhccfdefigfibifabeiaccghcegfbcghaefifbachebaacbhbfgfddeceababbacgffbagidebeadfihaefefegbghgddbbgddeehgfbhafbccidebgehifafgbghafacgfdccgifdcbbbidfifhdaibgigebigaedeaaiadegfefbhacgddhchgcbgcaeaieiegiffchbgbebgbehbbfcebciiagacaiechdigbgbghefcahgbhfibhedaeeiffebdiabcifgccdefabccdghehfibfiifdaicfedagahhdcbhbicdgibgcedieihcichadgchgbdcdagaihebbabhibcihicadgadfcihdheefbhffiageddhgahaidfdhhdbgciiaciegchiiebfbcbhaeagccfhbfhaddagnfieihghfbaggiffbbfbecgaiiidccdceadbbdfgigibgcgchafccdchgifdeieicbaididhfcfdedbhaadedfageigfdehgcdaecaebebebfcieaecfagfdieaefdiedbcadchabhebgehiidfcgahcdhcdhgchhiiheffiifeegcfdgbdeffhgeghdfhbfbifgidcafbfcd" ;
+	string testString = "mnonopoo" ;
 
 	auto start = std::chrono::system_clock::now();
 
-	cout << isValid(testString) << endl;
+	cout << substrCount(testString.length(),testString) << endl;
 
 	auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;

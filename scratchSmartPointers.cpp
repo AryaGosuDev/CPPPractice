@@ -13,14 +13,14 @@ using std::unique_ptr ;
 
 template <typename T>
 class Shared_LL {
-  typedef std::pair<Shared_LL &, bool> Shared_LL_return ;
+  using Shared_LL_return = std::pair<Shared_LL &, bool> ;
   public :
     class LLNode {
       friend class Shared_LL ;
       public :
         LLNode() = default ;
         LLNode( T _data ) : data ( new T(_data)) {} 
-        ~LLNode() {
+        virtual ~LLNode() {
           cout << "Deleting LLNode " << endl ;
         }
       private :
@@ -40,10 +40,12 @@ class Shared_LL {
       tail = head = root.get() ;
       size++ ;
     }
-    ~Shared_LL () {
+    
+    virtual ~Shared_LL () {
       cout << "Deleting LL " << endl;
 
     }
+
     Shared_LL_return add ( T & _data ) {
       LLNode * currentLastNode = tail ;
       currentLastNode->next = unique_ptr<LLNode> ( new LLNode(_data));
@@ -51,6 +53,7 @@ class Shared_LL {
       size++ ;
       return Shared_LL_return ( *this, true ) ;
     }
+
     Shared_LL_return add ( T && _data ) {
       LLNode * currentLastNode = tail ;
       currentLastNode->next = unique_ptr<LLNode> ( new LLNode(_data));
@@ -58,6 +61,7 @@ class Shared_LL {
       size++ ;
       return Shared_LL_return ( *this, true ) ;
     }
+
     Shared_LL_return removeLastNode () {
       if ( size == 0 ) return Shared_LL_return( *this, false ) ;
       LLNode * tempCurrent = head ;
@@ -79,6 +83,7 @@ class Shared_LL {
       tail = tempPrevious ;
       return Shared_LL_return ( *this, true);
     }
+
     Shared_LL_return removeNode ( LLNode * _nodeToRemove, LLNode * _nodePrevious) {
       if ( _nodeToRemove == NULL ) return Shared_LL_return ( *this, false );
       if ( _nodeToRemove == head) {
@@ -99,6 +104,7 @@ class Shared_LL {
       size--;
       return Shared_LL_return ( *this, true );
     }
+
     Shared_LL_return removeValue ( const T &  _data ) {
       if ( head == NULL ) return Shared_LL_return ( *this, false);
       if ( head == tail && *head->data == _data) return removeLastNode() ;
@@ -110,6 +116,7 @@ class Shared_LL {
       }
       return removeNode ( tempCurrent, tempPrevious ) ;
     }
+
     Shared_LL_return printLL () {
       LLNode * tempCurrent = head ;
       cout << "Printing LL : " << endl;
