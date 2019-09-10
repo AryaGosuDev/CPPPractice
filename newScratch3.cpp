@@ -10,47 +10,83 @@
 #include <unordered_map>
 #include <queue>
 
-using namespace std ;
+using namespace std; 
 
-int x_Moves[] = { -2, -1,1,2,2, 1,-1,-2 };
-int y_Moves[] = {  1,  2,2,1,-1,-2,-2,-1};
-
-bool canMove ( vector<vector<int>> & b, int x , int y ) {
-	return ( x >= 0 and x < 4 and y >= 0 and y < 4 and (( b[x][y] >= 1 and b[x][y] <= 9) or b[x][y] == 11) ) ;
-}
-
-int kt ( vector<vector<int>> & b, int x, int y, int i ) {
-	if ( i == 0 ) return 0 ;
-
-	int moves = 0 ;
-
-	for ( int j = 0 ; j < 8 ; ++j) {
-		int newXMove = x + x_Moves[j] ;
-		int newYMove = y + y_Moves[j] ;
-
-		if ( canMove ( b, newXMove, newYMove)) {
-
-			moves += 1 + kt ( b, newXMove, newYMove, i - 1);
-		}
-	}
-	return moves ;
-}
-
-int main() { 
-
-	vector<vector<int>> b = {{1,2,3}, {4,5,6} , {7,8,9}, {10,11,12}} ;
-
-	for ( auto & v : b ) {
-		for ( auto v1 : v ) {
-			cout << v1 << " " ;
-		}
-		cout << endl;
-	}
-	cout << endl ;
-
-	//cout << b[3][0] << endl ;
-
-	cout << kt ( b, 0,0,2) ;
-
+// Function to update segment tree 
+// i.e. to insert the element 
+void update(int* Tree, int index, int s, int e, int num) 
+{ 
+    // Leaf node condition 
+    if (s == num and e == num) { 
+        Tree[index] = 1; 
+        return; 
+    } 
+  
+    // No overlap condition 
+    if (num < s or num > e) { 
+        return; 
+    } 
+  
+    // Else call on both the children nodes 
+    int mid = (s + e) >> 1; 
+    update(Tree, 2 * index, s, mid, num); 
+    update(Tree, 2 * index + 1, mid + 1, e, num); 
+  
+    Tree[index] = Tree[2 * index] + Tree[2 * index + 1]; 
+} 
+  
+// Function to count the total numbers 
+// present in the range [a[i]+1, mx] 
+int query(int* Tree, int index, int s, 
+          int e, int qs, int qe) 
+{ 
+    // Complete overlap 
+    if (qs <= s and e <= qe) { 
+        return Tree[index]; 
+    } 
+  
+    // No Overlap 
+    if (s > qe or e < qs) { 
+        return 0; 
+    } 
+  
+    int mid = (s + e) >> 1; 
+  
+    return query(Tree, 2 * index, s, 
+                 mid, qs, qe) 
+           + query(Tree, 2 * index + 1, 
+                   mid + 1, e, qs, qe); 
+} 
+  
+// Driver code 
+int main(int argc, char const* argv[]) 
+{ 
+    int arr[] = { 8, 4, 2, 1 }; 
+    int n = sizeof(arr) / sizeof(arr[0]); 
+  
+    // Maximum element present in the array. 
+    int mx = *max_element(arr, arr + n); 
+  
+    // Segment Tree 
+    int Tree[6 * mx]; 
+  
+    // Initialize every node 
+    // of segment tree to 0 
+    memset(Tree, 0, sizeof(Tree)); 
+  
+    int answer = 0; 
+  
+    for (int i = 0; i < n; ++i) { 
+  
+        // add the count of inversion pair 
+        // formed with the element a[i] and the 
+        // elements appearing before the index i. 
+        answer += query(Tree, 1, 1, mx, arr[i] + 1, mx); 
+  
+        // Insert the a[i] in the segment tree 
+        update(Tree, 1, 1, mx, arr[i]); 
+    } 
+  
+    cout << answer; 
     return 0; 
 } 

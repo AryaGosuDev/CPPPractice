@@ -1,7 +1,3 @@
-//#include "Sales_data.h"
-//#include "StrBlob.h"
-//#include "StrBlobPtr.h"
-
 #include <string>
 #include <iostream>
 #include <stdio.h>
@@ -19,55 +15,21 @@
 #include <set>
 #include <sstream>
 #include <memory>
-//#include "vec.h"
+#include <queue>
 #include <unordered_set>
+#include <stack>
+#include <algorithm>
+#include <thread>
+#include <atomic>
+#include <random>
+#include "mat3x3.h"
+#include "vec3.h"
 
-using std::endl;
-using std::cout;
-using std::cin;
-using std::string;
-using std::copy;
-using std::for_each;
-using std::vector;
-using std::list;
-
-#include <string>
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-
-class A {
-public :
-  class B ;
-
-  void query ( B b) {
-
-    int i = b.i;
-  }
-
-private :
-
-};
-
-class A::B {
-
-public :
-
-  B () { i = 4 ;}
-  int i ;
-
-};
-
-int main ( void ) {
-
-  try {
+using namespace std ;
 
 
-    return 0;
-  } 
-	catch ( std::exception ex) {
-		cout << "Error : " << ex.what() << endl ;
-	}
+
+int main(int argc, char *argv[]) {
 
   return 0;
 }
