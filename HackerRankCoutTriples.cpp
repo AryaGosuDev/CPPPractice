@@ -26,7 +26,7 @@
 #include "mat3x3.h"
 #include "vec3.h"
 
-//typical cmd line compile : g++ --std=c++14 -O0 -Wall -Wextra -fsanitize=address -g main.cpp -o run
+//typical cmd line compile : g++ --std=c++14 -O0 -Wall -Wextra -fsanitize=address -fsanitize=undefined -g main.cpp -o run
 
 using namespace std ;
 

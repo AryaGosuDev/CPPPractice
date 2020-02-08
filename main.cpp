@@ -26,25 +26,15 @@
 #include "mat3x3.h"
 #include "vec3.h"
 
-//typical cmd line compile : g++ --std=c++14 -O0 -Wall -Wextra -fsanitize=address -g main.cpp -o return
+//typical cmd line compile : g++ --std=c++14 -O0 -Wall -Wextra -fsanitize=address -fsanitize=undefined -g main.cpp -o return
 
 using namespace std ;
 
-istream & retStream (  istream & _in) {
-  istream<char> eof ;
 
-  while ( _in != eof) {
-    string s ;
-    if ( getline ( _in, s )){
-      cout << s << endl ;
-    }
-  }
-  _in.clear() ;
-  return _in ;
-}
 
 //int main(int argc, char *argv[]) {
 int main() {
-  ifstream inFile ( "gppCommands.txt");
+  
+
   return 0;
 }

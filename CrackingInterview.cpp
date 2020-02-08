@@ -25,10 +25,10 @@
 #include "mat3x3.h"
 #include "vec3.h"
 
-//typical cmd line compilate : g++ --std=c++14 -O0 -Wall -Wextra -fsanitize=address -g CrackingInterview.cpp -o run
+//typical cmd line compilate : g++ --std=c++14 -O0 -Wall -Wextra -fsanitize=address -fsanitize=undefined -g CrackingInterview.cpp -o run
 
 using namespace std ;
-
+`
 void drawLine(uint8_t (&screen) [160], int width, int x1, int x2, int y) {
 	if ( x1 > x2 ) return ; size_t horLineWidth = x2 - x1 + 1 ;
 	for ( size_t i = 0 ; i < horLineWidth ; ++ i ) screen[(y*width) + (x1++)] = 1 ;
