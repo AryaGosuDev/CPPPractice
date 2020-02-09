@@ -16,7 +16,7 @@
 #include <sstream>
 #include <memory>
 #include <queue>
-#include <unordered_set>
+#include <unorderedset>
 #include <stack>
 #include <algorithm>
 #include <thread>
@@ -29,15 +29,15 @@
 
 using namespace std ;
 
-#define CHAR_SIZE 26
+#define CHARsIZE 26
 
 struct PrefixTrie {
 	bool isLeaf;
-	PrefixTrie * character[CHAR_SIZE];
+	PrefixTrie * character[CHARsIZE];
 	//function<bool(string )> deletion = bind ( &PrefixTrie::deleteH , this,  std::placeholders::_1, this) ;
 	
 	PrefixTrie() : isLeaf ( false ) {
-		memset ( (void*)character, 0 , sizeof ( PrefixTrie * ) * CHAR_SIZE ) ;
+		memset ( (void*)character, 0 , sizeof ( PrefixTrie * ) * CHARsIZE ) ;
 	}
 
 	~PrefixTrie() { printf ( "PrefixTrie dtor called") ;}
@@ -84,7 +84,7 @@ struct PrefixTrie {
 	}
 
 	bool haveChildren(PrefixTrie const * curr) const {
-		for (size_t i = 0; i < CHAR_SIZE; i++)
+		for (size_t i = 0; i < CHARsIZE; i++)
 			if (curr->character[i] != NULL) return true;
 		return false;
 	}
@@ -97,8 +97,8 @@ struct pTMarixNode {
 		lengthOfWord (l), pT ( pT ), ending ( ending ) {}
 };
 
-bool wordBreak(string _s, vector<string>& wordDict) {
-	uint32_t n = _s.size() ;
+bool wordBreak(string s, vector<string>& wordDict) {
+	uint32_t n = s.size() ;
 	
 	PrefixTrie * tree = new PrefixTrie() ;
 	for ( auto & v : wordDict) tree->insert( v ) ;
@@ -106,24 +106,29 @@ bool wordBreak(string _s, vector<string>& wordDict) {
 	vector < vector < pTMarixNode >> wordMatrix ( n ) ;
 	for ( uint32_t i = 0 ; i < n ; ++ i ) {
 		if ( i == 0 ) {
-			if ( tree->character[_s[i] - 'a'] != NULL ) {
-				wordMatrix[i].push_back ( pTMarixNode( tree->character[_s[i] - 'a'], 
-										  			   tree->character[_s[i] - 'a']->isLeaf, 1)) ;
+			if ( tree->character[s[i] - 'a'] != NULL ) {
+				wordMatrix[i].push_back ( pTMarixNode( tree->character[s[i] - 'a'], 
+										  			   tree->character[s[i] - 'a']->isLeaf, 1)) ;
 			}
 			else return false ;
 		}
 		else {
-			if ( tree->character[_s[i] - 'a'] != NULL) {
-				wordMatrix[i].push_back ( pTMarixNode( tree->character[_s[i] - 'a'], 
-										  			   tree->character[_s[i] - 'a']->isLeaf,1));
+			bool added = false ;
+			if ( tree->character[s[i] - 'a'] != NULL) {
+				wordMatrix[i].push_back ( pTMarixNode( tree->character[s[i] - 'a'], 
+										  			   tree->character[s[i] - 'a']->isLeaf,1));
+				added = true ;
 			}
 			for ( uint32_t i_prev = 0 ; i_prev < wordMatrix[i-1].size() ; ++i_prev ) {
-				PrefixTrie * tempPointer = wordMatrix[i-1][i_prev].pT->character[_s[i] - 'a'] ;
-				if ( tempPointer != NULL )
+				PrefixTrie * tempPointer = wordMatrix[i-1][i_prev].pT->character[s[i] - 'a'] ;
+				if ( tempPointer != NULL ){
 					wordMatrix[i].push_back ( pTMarixNode ( tempPointer, tempPointer->isLeaf,
 															wordMatrix[i-1][i_prev].lengthOfWord+1 ));
+					added = true ;
+				}
+				
 			}
-
+			if ( added == false) return false ;
 		}
 	}
 	/*
@@ -133,9 +138,9 @@ bool wordBreak(string _s, vector<string>& wordDict) {
 		}
 		cout << endl << endl ;
 	}
-
+*/
 	cout << "here" << endl ;
-	*/
+	
 	if ( wordMatrix[n-1].size() == 0 ) return false;
 	stack<pair<uint32_t,uint32_t>> wordStack ;
 	for ( uint32_t i = 0 ; i < wordMatrix[n-1].size(); ++ i ) {
@@ -157,9 +162,11 @@ bool wordBreak(string _s, vector<string>& wordDict) {
 
 int main () {
 
-	string s = "leetcode";
+	//"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	//["aa","aaa","aaaa","aaaaa","aaaaaa","aaaaaaa","aaaaaaaa","aaaaaaaaa","aaaaaaaaaa","ba"]
+	string s = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaabaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 	//vector<string> dict = {"kfomka","hecagbngambii","anobmnikj","c","nnkmfelneemfgcl","ah","bgomgohl","lcbjbg","ebjfoiddndih","hjknoamjbfhckb","eioldlijmmla","nbekmcnakif","fgahmihodolmhbi","gnjfe","hk","b","jbfgm","ecojceoaejkkoed","cemodhmbcmgl","j","gdcnjj","kolaijoicbc","liibjjcini","lmbenj","eklingemgdjncaa","m","hkh","fblb","fk","nnfkfanaga","eldjml","iejn","gbmjfdooeeko","jafogijka","ngnfggojmhclkjd","bfagnfclg","imkeobcdidiifbm","ogeo","gicjog","cjnibenelm","ogoloc","edciifkaff","kbeeg","nebn","jdd","aeojhclmdn","dilbhl","dkk","bgmck","ohgkefkadonafg","labem","fheoglj","gkcanacfjfhogjc","eglkcddd","lelelihakeh","hhjijfiodfi","enehbibnhfjd","gkm","ggj","ag","hhhjogk","lllicdhihn","goakjjnk","lhbn","fhheedadamlnedh","bin","cl","ggjljjjf","fdcdaobhlhgj","nijlf","i","gaemagobjfc","dg","g","jhlelodgeekj","hcimohlni","fdoiohikhacgb","k","doiaigclm","bdfaoncbhfkdbjd","f","jaikbciac","cjgadmfoodmba","molokllh","gfkngeebnggo","lahd","n","ehfngoc","lejfcee","kofhmoh","cgda","de","kljnicikjeh","edomdbibhif","jehdkgmmofihdi","hifcjkloebel","gcghgbemjege","kobhhefbbb","aaikgaolhllhlm","akg","kmmikgkhnn","dnamfhaf","mjhj","ifadcgmgjaa","acnjehgkflgkd","bjj","maihjn","ojakklhl","ign","jhd","kndkhbebgh","amljjfeahcdlfdg","fnboolobch","gcclgcoaojc","kfokbbkllmcd","fec","dljma","noa","cfjie","fohhemkka","bfaldajf","nbk","kmbnjoalnhki","ccieabbnlhbjmj","nmacelialookal","hdlefnbmgklo","bfbblofk","doohocnadd","klmed","e","hkkcmbljlojkghm","jjiadlgf","ogadjhambjikce","bglghjndlk","gackokkbhj","oofohdogb","leiolllnjj","edekdnibja","gjhglilocif","ccfnfjalchc","gl","ihee","cfgccdmecem","mdmcdgjelhgk","laboglchdhbk","ajmiim","cebhalkngloae","hgohednmkahdi","ddiecjnkmgbbei","ajaengmcdlbk","kgg","ndchkjdn","heklaamafiomea","ehg","imelcifnhkae","hcgadilb","elndjcodnhcc","nkjd","gjnfkogkjeobo","eolega","lm","jddfkfbbbhia","cddmfeckheeo","bfnmaalmjdb","fbcg","ko","mojfj","kk","bbljjnnikdhg","l","calbc","mkekn","ejlhdk","hkebdiebecf","emhelbbda","mlba","ckjmih","odfacclfl","lgfjjbgookmnoe","begnkogf","gakojeblk","bfflcmdko","cfdclljcg","ho","fo","acmi","oemknmffgcio","mlkhk","kfhkndmdojhidg","ckfcibmnikn","dgoecamdliaeeoa","ocealkbbec","kbmmihb","ncikad","hi","nccjbnldneijc","hgiccigeehmdl","dlfmjhmioa","kmff","gfhkd","okiamg","ekdbamm","fc","neg","cfmo","ccgahikbbl","khhoc","elbg","cbghbacjbfm","jkagbmfgemjfg","ijceidhhajmja","imibemhdg","ja","idkfd","ndogdkjjkf","fhic","ooajkki","fdnjhh","ba","jdlnidngkfffbmi","jddjfnnjoidcnm","kghljjikbacd","idllbbn","d","mgkajbnjedeiee","fbllleanknmoomb","lom","kofjmmjm","mcdlbglonin","gcnboanh","fggii","fdkbmic","bbiln","cdjcjhonjgiagkb","kooenbeoongcle","cecnlfbaanckdkj","fejlmog","fanekdneoaammb","maojbcegdamn","bcmanmjdeabdo","amloj","adgoej","jh","fhf","cogdljlgek","o","joeiajlioggj","oncal","lbgg","elainnbffk","hbdi","femcanllndoh","ke","hmib","nagfahhljh","ibifdlfeechcbal","knec","oegfcghlgalcnno","abiefmjldmln","mlfglgni","jkofhjeb","ifjbneblfldjel","nahhcimkjhjgb","cdgkbn","nnklfbeecgedie","gmllmjbodhgllc","hogollongjo","fmoinacebll","fkngbganmh","jgdblmhlmfij","fkkdjknahamcfb","aieakdokibj","hddlcdiailhd","iajhmg","jenocgo","embdib","dghbmljjogka","bahcggjgmlf","fb","jldkcfom","mfi","kdkke","odhbl","jin","kcjmkggcmnami","kofig","bid","ohnohi","fcbojdgoaoa","dj","ifkbmbod","dhdedohlghk","nmkeakohicfdjf","ahbifnnoaldgbj","egldeibiinoac","iehfhjjjmil","bmeimi","ombngooicknel","lfdkngobmik","ifjcjkfnmgjcnmi","fmf","aoeaa","an","ffgddcjblehhggo","hijfdcchdilcl","hacbaamkhblnkk","najefebghcbkjfl","hcnnlogjfmmjcma","njgcogemlnohl","ihejh","ej","ofn","ggcklj","omah","hg","obk","giig","cklna","lihaiollfnem","ionlnlhjckf","cfdlijnmgjoebl","dloehimen","acggkacahfhkdne","iecd","gn","odgbnalk","ahfhcd","dghlag","bchfe","dldblmnbifnmlo","cffhbijal","dbddifnojfibha","mhh","cjjol","fed","bhcnf","ciiibbedklnnk","ikniooicmm","ejf","ammeennkcdgbjco","jmhmd","cek","bjbhcmda","kfjmhbf","chjmmnea","ifccifn","naedmco","iohchafbega","kjejfhbco","anlhhhhg"} ;
-	std::vector<string> dict = {"leet","code"} ;
+	std::vector<string> dict = {"a","aa","aaa","aaaa","aaaaa","aaaaaa"} ;
 	cout << wordBreak ( s , dict )   << endl ;
 
 	return 0;
